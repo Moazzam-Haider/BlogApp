@@ -1,31 +1,61 @@
-import { StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, SafeAreaView, Text, View, StyleSheet } from 'react-native';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+}
 
-export default function TabOneScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+const BlogApp = () => {
+  const [posts, setPosts] = useState<Post[]>([]); // Specify Post[] as the type for posts state
+
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/posts') // Example URL for testing
+      .then(response => response.json())
+      .then((data: Post[]) => setPosts(data)) // Specify Post[] as the type for the fetched data
+      .catch(error => console.error('Error fetching data: ', error));
+  }, []);
+
+  const renderItem = ({ item }: { item: Post }) => ( // Specify item: Post as the type
+    <View style={styles.postContainer}>
+      <Text style={styles.postTitle}>{item.title}</Text>
+      <Text style={styles.postBody}>{item.body}</Text>
     </View>
   );
-}
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={posts}
+        renderItem={renderItem}
+        keyExtractor={item => item.id.toString()}
+      />
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 20,
+    paddingHorizontal: 10,
   },
-  title: {
-    fontSize: 20,
+  postContainer: {
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    paddingBottom: 10,
+  },
+  postTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 5,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  postBody: {
+    fontSize: 16,
+    lineHeight: 22,
   },
 });
+
+export default BlogApp;
